@@ -9,6 +9,7 @@ import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.AsyncTask;
+import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.Looper;
 import android.view.View;
@@ -41,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String pass = "BallardPi";
     private static Connection conn;
     private static int i = 0;
+    private static int percentage = 0;
 
     boolean requestingLocationUpdates = false;
     private FusedLocationProviderClient fusedLocationClient;
@@ -213,8 +215,12 @@ public class MainActivity extends AppCompatActivity {
                 conn = DriverManager.getConnection(url, user, pass);
 
                 i++;
+                BatteryManager bm = (BatteryManager)getSystemService(BATTERY_SERVICE);
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+                    percentage = bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
+                }
                 Statement preparedStmt = conn.createStatement();
-                preparedStmt.execute(" Update Test Set Battery='" + i + "' Where Row = '1'");
+                preparedStmt.execute(" Update Test Set Battery='" + percentage + "' Where Row = '1'");
                 preparedStmt.execute(" Update Test Set Heading=" + location.getBearing() + " Where Row = '1'");
                 preparedStmt.execute(" Update Test Set Lon='" + location.getLongitude() + "' Where Row = '1'");
                 preparedStmt.execute(" Update Test Set Lat='" + location.getLatitude() + "' Where Row = '1'");
